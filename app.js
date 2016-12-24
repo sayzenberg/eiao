@@ -50,7 +50,6 @@ function routes(db) {
 
     // Create a new ordeal whenever /ordeal/create is hit
     app.post('/ordeal/create', upload.single('image'), (req, res) => {
-        console.log(req.file);
         var collection = db.collection('ordeals');
         var path = parsePath(req.body.path);
 
@@ -62,6 +61,17 @@ function routes(db) {
 
         collection.insert(ordeal, (err, result) => {
             res.redirect('/' + path);
+        });
+    });
+
+    // Display a leaderboard of the top 10 ordeals
+    app.get('/leaderboard', (req, res) => {
+        var collection = db.collection('ordeals');
+
+        collection.find().sort({'hits': -1}).limit(10).toArray((err, topOrdeals) => {
+            res.render('leaderboard', {
+                data: topOrdeals
+            });
         });
     });
 
@@ -126,7 +136,7 @@ function incrementOrdealHits(collection, path, hits) {
         }
     });
 
-    if(!result) {
+    if (!result) {
         winston.warn("Failed to update hits for " + path);
     }
 }

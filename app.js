@@ -8,9 +8,13 @@ var path = require('path');
 var winston = require('winston');
 var fs = require('fs');
 
+// Default values for port and db connection string
+var localPort = '3000';
+var localDB = 'mongodb://localhost:27017/eiao';
+
 // Date connection configuration
 var database = null;
-var mongoUrl = process.env.CUSTOMCONNSTR_ordealDB;
+var mongoUrl = process.env.CUSTOMCONNSTR_ordealDB || localDB;
 
 // Image storage configuration
 var publicDirName = 'public';
@@ -183,6 +187,6 @@ function incrementOrdealHits(collection, path, hits) {
 }
 
 // Start listening on port 80
-app.listen(process.env.PORT, () => {
+app.listen(process.env.PORT || localPort, () => {
     winston.info('Keeping track of life, one ordeal at a time.');
 });

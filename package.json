@@ -1,0 +1,23 @@
+{
+  "name": "eiao",
+  "version": "1.0.0",
+  "description": "Keeping track of life, one ordeal at a time.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sayzenberg/eiao.git"
+  },
+  "author": "sayzenberg and scottlow",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sayzenberg/eiao/issues"
+  },
+  "homepage": "https://github.com/sayzenberg/eiao#readme",
+  "dependencies": {
+    "express": "^4.14.0",
+    "mongodb": "^2.2.16"
+  }
+}

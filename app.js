@@ -80,7 +80,7 @@ function routes(db) {
                 } else {
                     // Display ordeal and increment hit counter
                     res.render('ordeal', {
-                        title: 'Ordeal',
+                        title: ordeal.path + ' - Everything is an Ordeal',
                         path: ordeal.path,
                         image: uploadsDirName + '/' + ordeal.imageName,
                         hits: ordeal.hits + 1
@@ -132,5 +132,5 @@ function incrementOrdealHits(collection, path, hits) {
 
 // Start listening on port 3000. TODO: Change this to 80
 app.listen(3000, () => {
-    winston.info('We\'re ready to receive your ordeals!');
+    winston.info('Keeping track of life, one ordeal at a time.');
 });

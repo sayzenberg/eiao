@@ -9,7 +9,7 @@ var winston = require('winston');
 
 // Date connection configuration
 var database = null;
-var mongoUrl = 'mongodb://localhost:27017/eiao';
+var mongoUrl = process.env.CUSTOMCONNSTR_ordealDB;
 
 // Image storage configuration
 var publicDirName = 'public';

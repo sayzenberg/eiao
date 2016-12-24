@@ -131,7 +131,7 @@ function incrementOrdealHits(collection, path, hits) {
     }
 }
 
-// Start listening on port 3000. TODO: Change this to 80
-app.listen(3000, () => {
+// Start listening on port 80
+app.listen(80, () => {
     winston.info('Keeping track of life, one ordeal at a time.');
 });

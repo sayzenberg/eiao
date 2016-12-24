@@ -1,0 +1,34 @@
+extends layout.pug
+
+block title
+  title Manage Ordeals
+
+block content
+  script.
+    function deleteOrdeal(path) {
+      console.log('Deleting ' + path);
+      $.ajax({
+        type: 'DELETE',
+        url: '/ordeal/delete/' + path,
+      }).always(() => {
+          location.reload();
+      });
+    }
+
+  div.column
+  div.column
+    h1 Manage Ordeals
+    table
+      thead
+      tr
+        th Ordeal
+        th Hits
+        th Actions
+      each val in data
+        tr
+          td
+            a(href='/' + val.path) #{val.path}
+          td=val.hits
+          td
+            input(class='button', type='button', onclick='deleteOrdeal(\'' + val.path + '\')', value='Delete')
+  div.column

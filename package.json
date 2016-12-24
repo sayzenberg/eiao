@@ -18,6 +18,8 @@
   "homepage": "https://github.com/sayzenberg/eiao#readme",
   "dependencies": {
     "express": "^4.14.0",
+    "fs": "0.0.1-security",
+    "jquery": "^3.1.1",
     "milligram": "^1.2.4",
     "mongodb": "^2.2.16",
     "multer": "^1.2.1",

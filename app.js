@@ -6,6 +6,7 @@ var assert = require('assert');
 var multer = require('multer');
 var path = require('path');
 var winston = require('winston');
+var fs = require('fs');
 
 // Date connection configuration
 var database = null;
@@ -33,6 +34,7 @@ app.set('views', './views');
 app.set('view engine', 'pug');
 app.use(express.static(publicDirName))
 app.use('/milligram', express.static('node_modules/milligram/dist'))
+app.use('/jquery', express.static('node_modules/jquery/dist'))
 
 // Logging configuration
 winston.level = 'debug' // TODO: Change to 'log' when publishing
@@ -64,12 +66,51 @@ function routes(db) {
         });
     });
 
+    // Delete the data and image file for an ordeal
+    app.delete('/ordeal/delete/:path', (req, res) => {
+        var collection = db.collection('ordeals');
+        var path = parsePath(req.params.path);
+
+        // Delete the specified document and also retrieve it to get fileName
+        collection.findAndModify({
+            'path': path
+        }, null, null, {
+            remove: true
+        }, (err, document) => {
+            if (err) {
+                winston.error('Unable to delete ' + path);
+            } else {
+                // Delete image file corresponding to ordeal
+                fs.unlink(uploadsPath + '/' + document.value.imageName, (err) => {
+                    if (err) {
+                        winston.error('Unable to delete image for ' + path);
+                    }
+                });
+            }
+        });
+
+        res.send('Removed ordeal');
+    });
+
     // Display a leaderboard of the top 10 ordeals
     app.get('/leaderboard', (req, res) => {
         var collection = db.collection('ordeals');
 
-        collection.find().sort({'hits': -1}).limit(10).toArray((err, topOrdeals) => {
+        collection.find().sort({
+            'hits': -1
+        }).limit(10).toArray((err, topOrdeals) => {
             res.render('leaderboard', {
+                data: topOrdeals
+            });
+        });
+    });
+
+    // Display a management panel
+    app.get('/manage', (req, res) => {
+        var collection = db.collection('ordeals');
+
+        collection.find().toArray((err, topOrdeals) => {
+            res.render('manage', {
                 data: topOrdeals
             });
         });

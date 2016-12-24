@@ -132,6 +132,6 @@ function incrementOrdealHits(collection, path, hits) {
 }
 
 // Start listening on port 80
-app.listen(80, () => {
+app.listen(process.env.PORT, () => {
     winston.info('Keeping track of life, one ordeal at a time.');
 });

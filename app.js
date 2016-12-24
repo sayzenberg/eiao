@@ -32,6 +32,7 @@ var upload = multer({
 app.set('views', './views');
 app.set('view engine', 'pug');
 app.use(express.static(publicDirName))
+app.use('/milligram', express.static('node_modules/milligram/dist'))
 
 // Logging configuration
 winston.level = 'debug' // TODO: Change to 'log' when publishing

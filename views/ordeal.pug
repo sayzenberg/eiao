@@ -4,6 +4,15 @@ block title
   title=title
 
 block content
-  h1= path
-  img(src=image)
-  h1= hits
+  div#column
+    h1
+      span
+        b=path
+      span  has been an ordeal
+    img(src=image)
+    h1
+      span=hits
+      if hits == 1
+        span  time
+      else
+        span  times

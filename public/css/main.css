@@ -1,3 +1,7 @@
 .ordeal-container {
 	text-align: center;
 }
+
+.hidden {
+	display: none !important;
+}

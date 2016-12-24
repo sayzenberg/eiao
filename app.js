@@ -121,9 +121,9 @@ function routes(db) {
     });
 
     // Listen on all requests and show an ordeal or prompt the creation of one accordingly
-    app.get('*', (req, res) => {
+    app.get('/:ordeal', (req, res) => {
         if (req.path) {
-            var path = parsePath(req.path);
+            var path = parsePath(req.params.ordeal);
 
             var collection = db.collection('ordeals');
             tryGetOrdeal(collection, path).then((ordeal) => {

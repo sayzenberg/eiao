@@ -1,6 +1,6 @@
 # EIAO
 data
-uploads
+public/uploads
 
 # Logs
 logs

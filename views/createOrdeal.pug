@@ -1,0 +1,12 @@
+html
+	head
+		title= title
+	body
+		form(method='POST' action='/ordeal/create', enctype='multipart/form-data')
+			div.form-group
+				label(for='path') Ordeal:
+				input(type='text', readonly='true', value=path, name='path')
+			div.form-group
+				label(for='image') Image:
+				input(type='file', name='image')
+			button.btn.btn-primary(type='submit') Create Ordeal

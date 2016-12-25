@@ -7,6 +7,7 @@ var multer = require('multer');
 var path = require('path');
 var winston = require('winston');
 var fs = require('fs');
+var sharp = require('sharp');
 
 // Default values for port and db connection string
 var localPort = '3000';
@@ -20,6 +21,7 @@ var mongoUrl = process.env.CUSTOMCONNSTR_ordealDB || localDB;
 var publicDirName = 'public';
 var uploadsDirName = 'uploads';
 var uploadsPath = publicDirName + '/' + uploadsDirName + '/';
+var longestImageDimension = 500;
 
 var options = multer.diskStorage({
     destination: uploadsPath,
@@ -57,12 +59,21 @@ function routes(db) {
     // Create a new ordeal whenever /ordeal/create is hit
     app.post('/ordeal/create', upload.single('image'), (req, res) => {
         if (req.file) {
+            var fullImagePath = uploadsPath + req.file.filename;
+            var processedImageName = 'p-' + req.file.filename;
+
+            sharp(fullImagePath).resize(longestImageDimension, longestImageDimension).min().toFile(uploadsPath + processedImageName, (err) => {
+                if (err) {
+                    winston.error('Could not save resized image');
+                }
+            });
+
             var collection = db.collection('ordeals');
             var path = parsePath(req.body.path);
 
             var ordeal = {
                 'path': path,
-                'imageName': req.file.filename,
+                'imageName': processedImageName,
                 'hits': 0
             }
 
@@ -93,7 +104,7 @@ function routes(db) {
                 winston.error('Unable to delete ' + path);
             } else {
                 // Delete image file corresponding to ordeal
-                fs.unlink(uploadsPath + '/' + document.value.imageName, (err) => {
+                fs.unlink(uploadsPath + document.value.imageName, (err) => {
                     if (err) {
                         winston.error('Unable to delete image for ' + path);
                     }
@@ -170,7 +181,7 @@ function tryGetOrdeal(collection, path) {
                 winston.debug('No ordeals found. Resolving null.');
                 resolve(null);
             } else {
-                winston.debug('Found an ordeal. Resolving with data.');
+                winston.debug('Found an ordeal. Resolving with ' + path);
                 resolve(ordeals[0]); // Operating on the assumption that there's only ever one ordeal
             }
         });

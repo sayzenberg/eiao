@@ -32,8 +32,11 @@ coverage
 build/Release
 
 # Dependency directories
-node_modules
+node_modules/*
 jspm_packages
+
+# Exceptions
+!node_modules/sharp
 
 # Optional npm cache directory
 .npm

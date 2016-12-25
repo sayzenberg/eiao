@@ -58,8 +58,8 @@ function routes(db) {
         winston.error("Could not connect to database");
     }
 
-    // Create a new ordeal whenever /ordeal/create is hit
-    app.post('/ordeal/create', upload.single('image'), (req, res) => {
+    // Create a new ordeal whenever /api/ordeal/create is hit
+    app.post('/api/ordeal/create', upload.single('image'), (req, res) => {
         if (req.file) {
             var processedImageName = 'p-' + req.file.filename;
 
@@ -101,7 +101,7 @@ function routes(db) {
     });
 
     // Delete the data and image file for an ordeal
-    app.delete('/ordeal/delete/:path', (req, res) => {
+    app.delete('/api/ordeal/delete/:path', (req, res) => {
         var collection = db.collection('ordeals');
         var path = parsePath(req.params.path);
 
@@ -127,28 +127,18 @@ function routes(db) {
         res.send('Removed ordeal');
     });
 
-    // Display the homepage
-    app.get('/', (req, res) => {
+    // Fetch a JSON-formatted object for an ordeal
+    app.get('/api/ordeal/:path', (req, res) => {
         var collection = db.collection('ordeals');
 
-        var cursor = collection.aggregate({
-            $group: {
-                _id: '',
-                hits: {
-                    $sum: '$hits'
-                }
+        var path = parsePath(req.params.path);
+        tryGetOrdeal(collection, path).then((ordeal) => {
+            if (ordeal == null) {
+                res.sendStatus(404);
+            } else {
+                res.send(JSON.stringify(ordeal));
+                incrementOrdealHits(collection, ordeal.path, ordeal.hits);
             }
-        }, {
-            $project: {
-                _id: 0,
-                hits: '$hits'
-            }
-        });
-
-        cursor.get((err, sumObj) => {
-            res.render('homepage', {
-                totalHits: sumObj[0].hits
-            });
         });
     });
 
@@ -205,6 +195,31 @@ function routes(db) {
             });
         }
     });
+
+    // Display the homepage
+    app.get('/', (req, res) => {
+        var collection = db.collection('ordeals');
+
+        var cursor = collection.aggregate({
+            $group: {
+                _id: '',
+                hits: {
+                    $sum: '$hits'
+                }
+            }
+        }, {
+            $project: {
+                _id: 0,
+                hits: '$hits'
+            }
+        });
+
+        cursor.get((err, sumObj) => {
+            res.render('homepage', {
+                totalHits: sumObj[0].hits
+            });
+        });
+    });
 }
 
 function parsePath(path) {
@@ -220,7 +235,9 @@ function tryGetOrdeal(collection, path) {
             if (ordeals.length == 0) {
                 resolve(null);
             } else {
-                resolve(ordeals[0]); // Operating on the assumption that there's only ever one ordeal
+                var targetOrdeal = ordeals[0];
+                delete targetOrdeal._id;
+                resolve(targetOrdeal); // Operating on the assumption that there's only ever one ordeal
             }
         });
     });

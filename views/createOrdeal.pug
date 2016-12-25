@@ -12,7 +12,7 @@ block content
           var formData = new FormData($('#create-form')[0]);
           $.ajax({
               type: 'POST',
-              url: '/ordeal/create',
+              url: '/api/ordeal/create',
               data: formData,
               async: false,
               cache: false,

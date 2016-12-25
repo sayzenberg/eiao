@@ -9,7 +9,7 @@ block content
       console.log('Deleting ' + path);
       $.ajax({
         type: 'DELETE',
-        url: '/ordeal/delete/' + path,
+        url: '/api/ordeal/delete/' + path,
       }).done(() => {
           location.reload();
       }).fail((res) => {

@@ -23,6 +23,7 @@
     "milligram": "^1.2.4",
     "mongodb": "^2.2.16",
     "multer": "^1.2.1",
+    "multer-autoreap": "^0.1.2",
     "path": "^0.12.7",
     "pug": "^0.1.0",
     "sharp": "^0.17.0",

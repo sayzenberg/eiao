@@ -8,6 +8,7 @@ var path = require('path');
 var winston = require('winston');
 var fs = require('fs');
 var sharp = require('sharp');
+var autoReap = require('multer-autoreap');
 
 // Default values for port and db connection string
 var localPort = '3000';
@@ -24,7 +25,6 @@ var uploadsPath = publicDirName + '/' + uploadsDirName + '/';
 var longestImageDimension = 500;
 
 var options = multer.diskStorage({
-    destination: uploadsPath,
     filename: function(req, file, cb) {
         var ext = path.extname(file.originalname);
         cb(null, path.basename(file.originalname, ext) + Date.now() + ext);
@@ -34,6 +34,8 @@ var options = multer.diskStorage({
 var upload = multer({
     storage: options
 });
+
+app.use(autoReap);
 
 // App configuration
 app.set('views', './views');
@@ -59,31 +61,40 @@ function routes(db) {
     // Create a new ordeal whenever /ordeal/create is hit
     app.post('/ordeal/create', upload.single('image'), (req, res) => {
         if (req.file) {
-            var fullImagePath = uploadsPath + req.file.filename;
             var processedImageName = 'p-' + req.file.filename;
 
-            sharp(fullImagePath).resize(longestImageDimension, longestImageDimension).min().toFile(uploadsPath + processedImageName, (err) => {
-                if (err) {
-                    winston.error('Could not save resized image');
-                }
-            });
+            var fileStream = fs.readFile(req.file.path, (err, data) => {
+                // Resize any image so that its longest side is no longer than longestImageDimension px
+                sharp(data).resize(longestImageDimension, longestImageDimension).min().toFile(uploadsPath + processedImageName, (err) => {
+                    if (err) {
+                        winston.error('Could not save resized image');
+                        winston.error(err);
+                    }
+                    var collection = db.collection('ordeals');
+                    var path = parsePath(req.body.path);
 
-            var collection = db.collection('ordeals');
-            var path = parsePath(req.body.path);
+                    var ordeal = {
+                        'path': path,
+                        'imageName': processedImageName,
+                        'hits': 0
+                    }
 
-            var ordeal = {
-                'path': path,
-                'imageName': processedImageName,
-                'hits': 0
-            }
-
-            collection.insert(ordeal, (err, result) => {
-                winston.info('Created ordeal ' + path);
-                res.send({
-                    redirect: '/' + path
+                    collection.insert(ordeal, (err, result) => {
+                        if (err) {
+                            winston.error('Error creating ordeal ' + path);
+                            winston.error(err);
+                        } else {
+                            winston.info('Created ordeal ' + path);
+                            res.send({
+                                redirect: '/' + path
+                            });
+                        }
+                    });
                 });
             });
         } else {
+            // This error is displayed in createOrdeal.pug via jQuery
+            winston.warn('User did not submit an image. Returning 400');
             res.statusMessage = 'Please upload an image before submitting!';
             res.status(400).end();
         }
@@ -102,6 +113,7 @@ function routes(db) {
         }, (err, document) => {
             if (err) {
                 winston.error('Unable to delete ' + path);
+                winston.error(err);
             } else {
                 // Delete image file corresponding to ordeal
                 fs.unlink(uploadsPath + document.value.imageName, (err) => {
@@ -141,19 +153,22 @@ function routes(db) {
 
     // Listen on all requests and show an ordeal or prompt the creation of one accordingly
     app.get('/:ordeal', (req, res) => {
-        if (req.path) {
-            var path = parsePath(req.params.ordeal);
+        var ordealPath = req.params.ordeal;
+        if (ordealPath) {
+            var path = parsePath(ordealPath);
 
             var collection = db.collection('ordeals');
             tryGetOrdeal(collection, path).then((ordeal) => {
                 if (ordeal == null) {
                     // Show create ordeal page
+                    winston.debug('Displaying createOrdeal.pug');
                     res.render('createOrdeal', {
                         title: 'Create a new ordeal',
                         path: path
                     });
                 } else {
                     // Display ordeal and increment hit counter
+                    winston.debug('Displaying ordeal ' + ordeal.path);
                     res.render('ordeal', {
                         title: ordeal.path + ' - Everything is an Ordeal',
                         path: ordeal.path,
@@ -178,10 +193,8 @@ function tryGetOrdeal(collection, path) {
             'path': path
         }).toArray((err, ordeals) => {
             if (ordeals.length == 0) {
-                winston.debug('No ordeals found. Resolving null.');
                 resolve(null);
             } else {
-                winston.debug('Found an ordeal. Resolving with ' + path);
                 resolve(ordeals[0]); // Operating on the assumption that there's only ever one ordeal
             }
         });
@@ -201,7 +214,7 @@ function incrementOrdealHits(collection, path, hits) {
     });
 
     if (!result) {
-        winston.warn("Failed to update hits for " + path);
+        winston.error("Failed to update hits for " + path);
     }
 }
 

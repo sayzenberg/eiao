@@ -1,0 +1,25 @@
+extends layout.pug
+
+block title
+  title Everything is an Ordeal
+
+block content
+  div.column
+    h1 Everything is an Ordeal
+    h5 Keeping track of life, one ordeal at a time
+    br
+    br
+    h2 Since our launch, you've suffered through a total of  #[b #{totalHits}]
+      if totalHits == 1
+        span  ordeal
+      else
+        span  ordeals
+    br
+    br
+    p Enter an ordeal name in the address bar, or type one below to get started
+    input#getting-started(type='text')
+    button#getting-started-btn.btn.btn-primary(type='submit') Get Started
+  script.
+    $('#getting-started-btn').click(() => {
+      location.href = '/' + $('#getting-started').val();
+    });

@@ -127,6 +127,31 @@ function routes(db) {
         res.send('Removed ordeal');
     });
 
+    // Display the homepage
+    app.get('/', (req, res) => {
+        var collection = db.collection('ordeals');
+
+        var cursor = collection.aggregate({
+            $group: {
+                _id: '',
+                hits: {
+                    $sum: '$hits'
+                }
+            }
+        }, {
+            $project: {
+                _id: 0,
+                hits: '$hits'
+            }
+        });
+
+        cursor.get((err, sumObj) => {
+            res.render('homepage', {
+                totalHits: sumObj[0].hits
+            });
+        });
+    });
+
     // Display a leaderboard of the top 10 ordeals
     app.get('/leaderboard', (req, res) => {
         var collection = db.collection('ordeals');

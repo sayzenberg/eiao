@@ -56,18 +56,26 @@ function routes(db) {
 
     // Create a new ordeal whenever /ordeal/create is hit
     app.post('/ordeal/create', upload.single('image'), (req, res) => {
-        var collection = db.collection('ordeals');
-        var path = parsePath(req.body.path);
+        if (req.file) {
+            var collection = db.collection('ordeals');
+            var path = parsePath(req.body.path);
 
-        var ordeal = {
-            'path': path,
-            'imageName': req.file.filename,
-            'hits': 0
+            var ordeal = {
+                'path': path,
+                'imageName': req.file.filename,
+                'hits': 0
+            }
+
+            collection.insert(ordeal, (err, result) => {
+                winston.info('Created ordeal ' + path);
+                res.send({
+                    redirect: '/' + path
+                });
+            });
+        } else {
+            res.statusMessage = 'Please upload an image before submitting!';
+            res.status(400).end();
         }
-
-        collection.insert(ordeal, (err, result) => {
-            res.redirect('/' + path);
-        });
     });
 
     // Delete the data and image file for an ordeal

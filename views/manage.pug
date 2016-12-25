@@ -10,8 +10,10 @@ block content
       $.ajax({
         type: 'DELETE',
         url: '/ordeal/delete/' + path,
-      }).always(() => {
+      }).done(() => {
           location.reload();
+      }).fail((res) => {
+          console.log(res.statusText);
       });
     }
 

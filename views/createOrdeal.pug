@@ -4,12 +4,36 @@ block title
   title Create an Ordeal
 
 block content
+  script.
+    $(document).ready(() => {
+      $('#create-form').submit((e) => {
+          e.preventDefault();
+
+          var formData = new FormData($('#create-form')[0]);
+          $.ajax({
+              type: 'POST',
+              url: '/ordeal/create',
+              data: formData,
+              async: false,
+              cache: false,
+              contentType: false,
+              processData: false
+          }).done((res) => {
+            if(res.redirect) {
+              window.location.href = res.redirect
+            }
+          }).fail((err) => {
+            $('#error-message').text(err.statusText).removeClass('hidden')
+          });
+      });
+    })
   div.column
-    form(method='POST' action='/ordeal/create', enctype='multipart/form-data')
+    form#create-form(enctype='multipart/form-data')
       div.form-group
         label(for='path') #[h4 Create the #[b #{path}] ordeal]
-        input.hidden(type='text', readonly, value=path, name='path')
+        input(type='hidden', readonly, value=path, name='path')
       div.form-group
-        label(for='path') Add an image
+        label(for='image') Add an image
+        div#error-message.hidden.error
         input(type='file', name='image')
       button.btn.btn-primary(type='submit') Create Ordeal

@@ -1,3 +1,3 @@
 loggingEnabled: true
 devErrorsEnabled: true
-nodeProcessCommandLine: "D:\home\site\wwwroot\bin\nodejs\node.exe"
+nodeProcessCommandLine: D:\home\site\wwwroot\bin\nodejs\node.exe

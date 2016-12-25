@@ -136,8 +136,9 @@ function routes(db) {
             if (ordeal == null) {
                 res.sendStatus(404);
             } else {
+                ordeal.hits++;
                 res.send(JSON.stringify(ordeal));
-                incrementOrdealHits(collection, ordeal.path, ordeal.hits);
+                incrementOrdealHits(collection, ordeal.path, --ordeal.hits);
             }
         });
     });

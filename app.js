@@ -217,7 +217,7 @@ function routes(db) {
 
         cursor.get((err, sumObj) => {
             res.render('homepage', {
-                totalHits: sumObj[0].hits
+                totalHits: sumObj.length === 0 ? 0 : [0].hits
             });
         });
     });

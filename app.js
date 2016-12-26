@@ -24,6 +24,9 @@ var uploadsDirName = 'uploads';
 var uploadsPath = publicDirName + '/' + uploadsDirName + '/';
 var longestImageDimension = 500;
 
+// Total hit count
+var totalHitCounter = 0;
+
 var options = multer.diskStorage({
     filename: function(req, file, cb) {
         var ext = path.extname(file.originalname);
@@ -50,6 +53,7 @@ winston.level = 'debug' // TODO: Change to 'log' when publishing
 // Connect to MongoDB and globalize the connection
 mongoClient.connect(mongoUrl, (err, db) => {
     database = db;
+    calculateTotalHits(database.collection('ordeals'));
     routes(database);
 });
 
@@ -199,31 +203,35 @@ function routes(db) {
 
     // Display the homepage
     app.get('/', (req, res) => {
-        var collection = db.collection('ordeals');
 
-        collection.aggregate(
-            [
-                {
-                    '$group': {
-                        "_id": '',
-                        "hits": {
-                            '$sum': '$hits'
-                        }
-                    }
-                },
-                {
-                    '$project': {
-                        "_id": 0,
-                        "hits": '$hits'
-                    }
-                }
-            ],
-            (err, results) => {
-                res.render('homepage', {
-                    totalHits: results.length === 0 ? 0 : results[0].hits
-                });
-            }
-        );
+        res.render('homepage', {
+            totalHits: totalHitCounter
+        });
+        // var collection = db.collection('ordeals');
+
+        // collection.aggregate(
+        //     [
+        //         {
+        //             '$group': {
+        //                 "_id": '',
+        //                 "hits": {
+        //                     '$sum': '$hits'
+        //                 }
+        //             }
+        //         },
+        //         {
+        //             '$project': {
+        //                 "_id": 0,
+        //                 "hits": '$hits'
+        //             }
+        //         }
+        //     ],
+        //     (err, results) => {
+        //         res.render('homepage', {
+        //             totalHits: results.length === 0 ? 0 : results[0].hits
+        //         });
+        //     }
+        // );
     });
 }
 
@@ -250,6 +258,22 @@ function tryGetOrdeal(collection, path) {
     return p;
 }
 
+function calculateTotalHits(collection)
+{
+    var cursor = collection.find();
+    cursor.each((err, doc) => {
+        if(doc == null)
+        {
+            cursor.toArray((err, items) => {
+                for (var i = 0; i < items.length; i++)
+                {
+                    totalHitCounter += items[i].hits;
+                }
+            });
+        }
+    });
+}
+
 function incrementOrdealHits(collection, path, hits) {
     // Increment ordeal hits by one
     var result = collection.update({
@@ -263,6 +287,9 @@ function incrementOrdealHits(collection, path, hits) {
     if (!result) {
         winston.error("Failed to update hits for " + path);
     }
+
+    // Update the global hit counter
+    totalHitCounter++;
 }
 
 // Start listening on port 80

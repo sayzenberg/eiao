@@ -10,10 +10,11 @@ block content
     br
     br
     h2 #[b #{totalHits}]
-      if totalHits == 1
-        span  ordeal
-      else
-        span  ordeals
+      a(href='/leaderboard')
+        if totalHits == 1
+          span  ordeal
+        else
+          span  ordeals
       span  and counting
     br
     br

@@ -203,35 +203,9 @@ function routes(db) {
 
     // Display the homepage
     app.get('/', (req, res) => {
-
         res.render('homepage', {
             totalHits: totalHitCounter
         });
-        // var collection = db.collection('ordeals');
-
-        // collection.aggregate(
-        //     [
-        //         {
-        //             '$group': {
-        //                 "_id": '',
-        //                 "hits": {
-        //                     '$sum': '$hits'
-        //                 }
-        //             }
-        //         },
-        //         {
-        //             '$project': {
-        //                 "_id": 0,
-        //                 "hits": '$hits'
-        //             }
-        //         }
-        //     ],
-        //     (err, results) => {
-        //         res.render('homepage', {
-        //             totalHits: results.length === 0 ? 0 : results[0].hits
-        //         });
-        //     }
-        // );
     });
 }
 

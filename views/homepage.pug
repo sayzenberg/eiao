@@ -24,7 +24,7 @@ block content
         input#path(type='text', name='path')
       button#getting-started-btn.btn.btn-primary(type='submit') Get Started
   script.
-    $('#create-form').submit((e) => {
+    $('#create-form').submit(function(e) {
       e.preventDefault();
       location.href = '/' + $('#path').val();
     });

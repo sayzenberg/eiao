@@ -201,25 +201,29 @@ function routes(db) {
     app.get('/', (req, res) => {
         var collection = db.collection('ordeals');
 
-        var cursor = collection.aggregate({
-            $group: {
-                _id: '',
-                hits: {
-                    $sum: '$hits'
+        collection.aggregate(
+            [
+                {
+                    '$group': {
+                        "_id": '',
+                        "hits": {
+                            '$sum': '$hits'
+                        }
+                    }
+                },
+                {
+                    '$project': {
+                        "_id": 0,
+                        "hits": '$hits'
+                    }
                 }
+            ],
+            (err, results) => {
+                res.render('homepage', {
+                    totalHits: results.length === 0 ? 0 : results[0].hits
+                });
             }
-        }, {
-            $project: {
-                _id: 0,
-                hits: '$hits'
-            }
-        });
-
-        cursor.get((err, sumObj) => {
-            res.render('homepage', {
-                totalHits: sumObj.length === 0 ? 0 : [0].hits
-            });
-        });
+        );
     });
 }
 

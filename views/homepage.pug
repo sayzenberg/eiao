@@ -1,0 +1,30 @@
+extends layout.pug
+
+block title
+  title Everything is an Ordeal
+
+block content
+  div.column
+    h1 Everything is an Ordeal
+    h5 Keeping track of life, one ordeal at a time
+    br
+    br
+    h2 #[b #{totalHits}]
+      a(href='/leaderboard')
+        if totalHits == 1
+          span  ordeal
+        else
+          span  ordeals
+      span  and counting
+    br
+    br
+    p Enter an ordeal name in the address bar, or type one below to get started
+    form#create-form(enctype='multipart/form-data')
+      div.form-group
+        input#path(type='text', name='path')
+      button#getting-started-btn.btn.btn-primary(type='submit') Get Started
+  script.
+    $('#create-form').submit(function(e) {
+      e.preventDefault();
+      location.href = '/' + $('#path').val();
+    });

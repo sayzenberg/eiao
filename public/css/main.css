@@ -1,0 +1,12 @@
+.ordeal-container {
+	text-align: center;
+}
+
+.hidden {
+	display: none !important;
+}
+
+.error {
+	color: red;
+	font-size: 10pt;
+}
